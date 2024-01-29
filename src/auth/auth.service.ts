@@ -4,7 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { encodePassword, comparePassword } from './bcrypt';
-import { AuthSigninDto } from './dto/signin-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -28,33 +27,19 @@ export class AuthService {
     return newUser;
   }
 
-  async signin({ phone, password }: AuthSigninDto) {
-    const user = await this.userRepository.findOne({ where: { phone } });
-    if (!user) {
-      throw new HttpException('Invalid phone', HttpStatus.UNAUTHORIZED);
-    }
-
-    const areEqual = await comparePassword(password, user.password);
-
-    if (!areEqual) {
-      throw new HttpException('Invalid password', HttpStatus.UNAUTHORIZED);
-    }
-
-    return { message: 'success' };
-  }
-
   async validateUser(phone: string, password: string) {
     const user = await this.userRepository.findOne({ where: { phone } });
+
     if (!user) {
-      throw new HttpException('Invalid phone', HttpStatus.UNAUTHORIZED);
+      return null;
     }
 
     const areEqual = await comparePassword(password, user.password);
 
-    if (!areEqual) {
-      throw new HttpException('Invalid password', HttpStatus.UNAUTHORIZED);
+    if (areEqual) {
+      return user;
     }
 
-    return { message: 'success' };
+    return null;
   }
 }
