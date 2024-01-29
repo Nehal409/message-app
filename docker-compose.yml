@@ -1,0 +1,42 @@
+version: '3.7'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npm run start:dev
+    container_name: message-app-api
+    env_file:
+      - .env
+    ports:
+      - 80:80
+      - 9228:9228
+    depends_on:
+      - db
+    volumes:
+      - './src/:/app/src'
+      - './db/:/app/db'
+    networks:
+      - message-app
+
+  db:
+    image: mysql:5.7
+    container_name: message-db
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - 3306:3306
+    volumes:
+      - message-db:/var/lib/mysql
+    networks:
+      - message-app
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --character-set-client-handshake=FALSE #Set utf8mb4
+
+volumes:
+  message-db: ~
+
+networks:
+  message-app:
+    name: message-app-api
