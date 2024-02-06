@@ -10,7 +10,8 @@ services:
     env_file:
       - .env
     ports:
-      - 80:80
+      - 3000:3000 # for websockets
+      - 3001:3001 # for http
       - 9228:9228
     depends_on:
       - db

@@ -11,6 +11,7 @@ import {
 import { AuthService } from './auth.service';
 import { AuthSignupDto } from './dto/signup-user.dto';
 import { LocalAuthGuard } from './utils/guards/local-auth.guard';
+import { AuthenticatedGuard } from './utils/guards/authenticated.guard';
 
 @Controller('/auth')
 export class AuthController {
@@ -25,6 +26,12 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('/signin')
   async login(@Request() req) {
+    return req.user;
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Get('/test')
+  async test(@Request() req) {
     return req.user;
   }
 
