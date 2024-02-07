@@ -16,7 +16,6 @@ import { WsAuthenticatedGuard } from './guards/ws.guard';
 
 const { WS_PORT, ORIGIN } = process.env;
 const port = Number(WS_PORT);
-console.log(port);
 
 @WebSocketGateway(port, {
   cors: {
