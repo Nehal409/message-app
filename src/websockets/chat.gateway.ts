@@ -79,7 +79,7 @@ export class ChatGateway implements OnGatewayConnection {
     try {
       // @ts-ignore
       const user = socket.request.user.user;
-
+      // When user is failed at handleConnection due to invalid credentials it is also redirected to this function thats why try catch is used here
       if (user) {
         // Remove the disconnected user from the list
         delete this.connectedUsers[user];
