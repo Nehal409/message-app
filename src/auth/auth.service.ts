@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { encodePassword, comparePassword } from './bcrypt';
+import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class AuthService {
@@ -41,5 +42,25 @@ export class AuthService {
     }
 
     return null;
+  }
+
+  async getUserFromSocketRequest(socket) {
+    const userId = socket.user;
+    if (!userId) {
+      throw new WsException('UserId is missing');
+    }
+
+    const user = await this.userRepository.findOne({
+      select: {
+        id: true,
+        username: true,
+      },
+      where: { id: userId.user },
+    });
+
+    if (!user) {
+      throw new WsException('Invalid credentials');
+    }
+    return user;
   }
 }

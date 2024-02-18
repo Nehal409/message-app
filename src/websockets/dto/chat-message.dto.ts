@@ -3,9 +3,9 @@ import { IsNotEmpty, IsString } from 'class-validator';
 export class ChatMessageDto {
   @IsNotEmpty()
   @IsString()
-  nickname: string;
+  message: string;
 
   @IsNotEmpty()
   @IsString()
-  message: string;
+  receiverId: string;
 }
