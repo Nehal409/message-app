@@ -7,11 +7,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/auth/entities/user.entity';
 import { AuthService } from 'src/auth/auth.service';
 import { TypeORMSession } from 'src/auth/entities/session.entity';
+import { ChatsService } from 'src/chats/chats.service';
+import { Chat } from 'src/chats/entities/chat.entity';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, TypeORMSession]),
+    TypeOrmModule.forFeature([User, TypeORMSession, Chat]),
     PassportModule.register({ session: true }),
   ],
-  providers: [ChatGateway, AuthService, LocalStrategy, SessionSerializer],
+  providers: [
+    ChatGateway,
+    AuthService,
+    ChatsService,
+    LocalStrategy,
+    SessionSerializer,
+  ],
 })
 export class WebSocketsModule {}

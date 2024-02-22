@@ -1,6 +1,5 @@
-import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto';
-import { UpdateChatDto } from './dto/update-chat.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Chat } from './entities/chat.entity';
 import { Repository } from 'typeorm';
@@ -11,23 +10,11 @@ export class ChatsService {
     @InjectRepository(Chat) private chatRepository: Repository<Chat>,
   ) {}
 
-  // async create(createMovieDto: CreateMovieDto) {
-  //   const title = createMovieDto.title;
-  //   const existingMovie = await this.movieRepository.findOne({
-  //     where: { title },
-  //   });
-
-  //   if (existingMovie) {
-  //     throw new HttpException(
-  //       'This movie already exists',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   }
-
-  //   const newMovie = this.movieRepository.create(createMovieDto);
-  //   await this.movieRepository.save(newMovie);
-  //   return newMovie;
-  // }
+  async createMessage(createChatDto: CreateChatDto) {
+    const newMessage = this.chatRepository.create(createChatDto);
+    await this.chatRepository.save(newMessage);
+    return newMessage;
+  }
 
   // async findAll(limit: number, page: number) {
   //   const findMovies = await this.movieRepository.find({

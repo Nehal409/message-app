@@ -48,8 +48,14 @@ export class Chat {
   })
   sender: User;
 
+  @Column()
+  senderId: string;
+
   @ManyToOne(() => User, (user) => user.receiver, {
     onDelete: 'SET NULL',
   })
   receiver: User;
+
+  @Column()
+  receiverId: string;
 }

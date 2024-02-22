@@ -17,6 +17,9 @@ import { WebSocketExceptionFilter } from './filters/ws-exception.filter';
 import { WsAuthenticatedGuard } from './guards/ws.guard';
 import { AuthService } from 'src/auth/auth.service';
 import { ChatMessageDto } from './dto/chat-message.dto';
+import { ChatsService } from 'src/chats/chats.service';
+import { CreateChatDto } from 'src/chats/dto/create-chat.dto';
+import { User } from 'src/auth/entities/user.entity';
 
 const { WS_PORT, ORIGIN } = process.env;
 const port = Number(WS_PORT);
@@ -32,7 +35,10 @@ export class ChatGateway implements OnGatewayConnection {
   server: Server;
 
   private connectedUsers: { [userId: string]: Socket } = {};
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly chatService: ChatsService,
+  ) {}
 
   @UseGuards(WsAuthenticatedGuard)
   @UseFilters(WebSocketExceptionFilter)
@@ -46,15 +52,20 @@ export class ChatGateway implements OnGatewayConnection {
       const sender = await this.authService.getUserFromSocketRequest(
         socket.request,
       );
-
       // Find the socket of the recipient and emit the message to them
       const receiverSocket = this.findSocketByUserId(payload.receiverId);
-      if (receiverSocket) {
-        receiverSocket.emit('receive_message', {
-          sender,
-          message: payload.message,
-        });
+      if (!receiverSocket) {
+        this.handleError(socket, 'Receiver not found');
+        return;
       }
+      const chatDto: CreateChatDto = {
+        messageContent: payload.message,
+        senderId: sender.id,
+        receiverId: payload.receiverId,
+      };
+
+      await this.chatService.createMessage(chatDto);
+      this.emitMessage(receiverSocket, sender, payload.message);
     } catch (error) {
       console.error(`Error connecting user: ${error.message}`);
     }
@@ -75,6 +86,8 @@ export class ChatGateway implements OnGatewayConnection {
     }
   }
 
+  // Why is it necessary to remove a user from the list of connected users? This is important because once a user has initially connected to the system, other users have the ability to send messages to them. Even if the user logs out or their cookie expires, it's crucial not to disconnect them from the system so that other users can continue sending messages to them.
+  // Will have to change this in future
   async handleDisconnect(socket: Socket) {
     try {
       // @ts-ignore
@@ -92,5 +105,14 @@ export class ChatGateway implements OnGatewayConnection {
   findSocketByUserId(userId: string): Socket | null {
     const socket = this.connectedUsers[userId];
     return socket || null;
+  }
+
+  handleError(socket: Socket, errorMessage: string): void {
+    socket.emit('error_message', { error: errorMessage });
+    console.error(errorMessage);
+  }
+
+  emitMessage(receiverSocket: Socket, sender: User, message: string): void {
+    receiverSocket.emit('receive_message', { sender, message });
   }
 }
