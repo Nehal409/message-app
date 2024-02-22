@@ -1,50 +1,18 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  UsePipes,
-  ValidationPipe,
-  Query,
-  Put,
-  ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Request } from '@nestjs/common';
 import { ChatsService } from './chats.service';
-import { CreateChatDto } from './dto/create-chat.dto';
-import { UpdateChatDto } from './dto/update-chat.dto';
+import { AuthenticatedGuard } from 'src/auth/utils/guards/authenticated.guard';
 
-@Controller('/movies')
+@Controller('/chat')
 export class ChatsController {
-  constructor(private readonly chatsService: ChatsService) {}
+  constructor(private readonly chatService: ChatsService) {}
 
-  // @Post()
-  // @UsePipes(ValidationPipe)
-  // create(@Body() createMovieDto: CreateMovieDto) {
-  //   return this.moviesService.create(createMovieDto);
-  // }
-
-  // @Get()
-  // async findAll(
-  //   @Query('page', ParseIntPipe) page: number = 0,
-  //   @Query('limit') limit: number = 8,
-  // ) {
-  //   return this.moviesService.findAll(limit, page);
-  // }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.moviesService.findOne(+id);
-  // }
-
-  // @Put(':id')
-  // update(@Param('id') id: string, @Body() updateMovieDto: UpdateMovieDto) {
-  //   return this.moviesService.update(+id, updateMovieDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.moviesService.remove(+id);
-  // }
+  @UseGuards(AuthenticatedGuard)
+  @Get(':receiverId')
+  async getPrivateChat(
+    @Param('receiverId') receiverId: string,
+    @Request() req,
+  ) {
+    const sender = req.user;
+    return this.chatService.fetchPrivateMessage(sender.user, receiverId);
+  }
 }

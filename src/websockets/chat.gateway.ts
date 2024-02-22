@@ -67,7 +67,7 @@ export class ChatGateway implements OnGatewayConnection {
       await this.chatService.createMessage(chatDto);
       this.emitMessage(receiverSocket, sender, payload.message);
     } catch (error) {
-      console.error(`Error connecting user: ${error.message}`);
+      console.error(`Error: ${error.message}`);
     }
   }
 
